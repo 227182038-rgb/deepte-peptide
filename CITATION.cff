@@ -1,0 +1,17 @@
+cff-version: 1.2.0
+message: "If you use DeepTE-Peptide in your research, please cite it as below."
+authors:
+  - name: "DeepTE-Peptide Research Team"
+title: "DeepTE-Peptide: Multi-Modal Deep Learning for Pan-Cancer Prediction of Immunogenic Transposable Element-Derived Cryptic Peptides"
+version: 0.1.0
+date-released: 2026-11-10
+url: "https://github.com/227182038-rgb/deepte-peptide"
+keywords:
+  - "bioinformatics"
+  - "deep-learning"
+  - "transposable-elements"
+  - "cryptic-peptides"
+  - "immunogenicity"
+  - "neoantigen-prediction"
+  - "cancer-immunotherapy"
+license: MIT

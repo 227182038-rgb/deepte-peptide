@@ -1,0 +1,131 @@
+# Data configuration
+
+datasets:
+  tcga:
+    enabled: true
+    gdc_manifest: ${paths.external_data}/gdc_manifest.tsv
+    cancer_types:
+      - BRCA
+      - LUAD
+      - LUSC
+      - COAD
+      - READ
+      - STAD
+      - LIHC
+      - KIRC
+      - KIRP
+      - GBM
+      - LGG
+      - OV
+      - UCEC
+      - HNSC
+      - PRAD
+      - THCA
+      - SKCM
+      - BLCA
+      - PAAD
+      - CESC
+      - PCPG
+      - SARC
+      - ESCA
+      - TGCT
+      - MESO
+      - ACC
+      - UCS
+      - DLBC
+      - CHOL
+      - KICH
+      - UCS
+      - LAML
+      - UCS
+    min_reads: 30_000_000
+    paired_end: true
+
+  gtex:
+    enabled: true
+    version: v8
+    tissues:
+      - Breast
+      - Lung
+      - Colon
+      - Liver
+      - Kidney
+      - Brain
+      - Blood
+      - Skin
+      - Prostate
+      - Ovary
+      - Stomach
+      - Pancreas
+
+  ccle:
+    enabled: true
+    release: DepMap_Public_24Q2
+    min_expression: 1.0  # log2(TPM+1)
+
+  iedb:
+    enabled: true
+    epitope_url: https://www.iedb.org/downloader.php?file_id=34
+    mhc_assay_url: https://www.iedb.org/downloader.php?file_id=42
+    tcell_assay_url: https://www.iedb.org/downloader.php?file_id=43
+
+  riboseq:
+    enabled: true
+    sources:
+      - gwips_viz
+      - ribo_seq_db
+      - rpfbp
+    min_periodicity_score: 0.5
+    min_psite_reads: 5
+
+  te_annotations:
+    dfam_version: 3.7
+    repeatmasker_library: Dfam.h5
+    te_superfamilies:
+      - LINE
+      - SINE
+      - LTR
+      - DNA
+      - RC
+      - Retroposon
+    min_te_length: 100
+
+  hla:
+    source: allelefrequency.net
+    alleles:
+      hla_a: ["A*02:01", "A*01:01", "A*03:01", "A*24:02", "A*11:01", "A*68:01"]
+      hla_b: ["B*07:02", "B*08:01", "B*44:02", "B*44:03", "B*35:01", "B*51:01"]
+      hla_c: ["C*07:01", "C*07:02", "C*04:01", "C*06:02", "C*03:04", "C*05:01"]
+
+# ORF calling on TE transcripts
+orf_calling:
+  min_length_aa: 8
+  max_length_aa: 25
+  start_codons: ["ATG"]
+  include_non_canonical: true
+  six_frame: true
+
+# Peptide-MHC binding
+mhc_binding:
+  predictor: netmhcpan
+  version: 4.1
+  length: [8, 9, 10, 11]
+  threshold_strong binder: 0.5  # %Rank
+  threshold_weak_binder: 2.0
+  parallel_workers: 8
+
+# Ribo-seq evidence
+riboseq_evidence:
+  min_orf_coverage: 0.5
+  min_psite_count: 5
+  periodicity_required: true
+  three_frame_periodicity: false
+
+# Train/val/test split
+split:
+  strategy: cancer_type_stratified  # cancer_type_stratified | hla_stratified | random
+  train_frac: 0.70
+  val_frac: 0.15
+  test_frac: 0.15
+  holdout_cancer_types: ["SKCM", "GBM"]  # held out entirely for cross-cancer evaluation
+  holdout_hla: ["A*24:02"]               # held out for cross-HLA evaluation

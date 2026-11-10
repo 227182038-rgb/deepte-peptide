@@ -1,0 +1,43 @@
+# DeepTE-Peptide default configuration
+# All other config files are merged into this default.
+
+seed: 42
+project_name: deepte-peptide
+version: 0.1.0
+deterministic: true
+cudnn_deterministic: true
+cudnn_benchmark: false
+
+# Paths
+paths:
+  data_dir: ${env:DEEPTE_DATA_DIR,data}
+  results_dir: ${env:DEEPTE_RESULTS_DIR,results}
+  config_dir: ${env:DEEPTE_CONFIG_DIR,config}
+  raw_data: ${paths.data_dir}/raw
+  processed_data: ${paths.data_dir}/processed
+  external_data: ${paths.data_dir}/external
+  sample_data: ${paths.data_dir}/sample
+  model_dir: ${paths.results_dir}/models
+  figure_dir: ${paths.results_dir}/figures
+  report_dir: ${paths.results_dir}/reports
+  log_dir: ${paths.results_dir}/logs
+
+# Logging
+logging:
+  level: INFO
+  format: "<green>{time:YYYY-MM-DD HH:mm:ss.SSS}</green> | <level>{level: <8}</level> | <cyan>{name}</cyan>:<cyan>{function}</cyan>:<cyan>{line}</cyan> - <level>{message}</level>"
+  loguru_file: ${paths.log_dir}/deepte_${now:%Y%m%d_%H%M%S}.log
+
+# MLflow
+mlflow:
+  tracking_uri: file://${paths.results_dir}/mlruns
+  experiment_name: deepte-peptide
+  run_name: baseline_${now:%Y%m%d_%H%M%S}
+
+# Hydra
+hydra:
+  run:
+    dir: ${paths.results_dir}/runs/${now:%Y-%m-%d_%H-%M-%S}
+  sweep:
+    dir: ${paths.results_dir}/multiruns/${now:%Y-%m-%d_%H-%M-%S}
+    subdir: ${hydra.job.num}

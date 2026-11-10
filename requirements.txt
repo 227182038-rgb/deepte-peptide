@@ -1,0 +1,54 @@
+# Core scientific stack
+numpy==1.26.4
+scipy==1.12.0
+pandas==2.2.0
+scikit-learn==1.4.0
+statsmodels==0.14.1
+
+# PyTorch (CPU build by default; install GPU build via pytorch.org for CUDA)
+torch==2.2.0
+torchvision==0.17.0
+torchaudio==2.2.0
+
+# Deep learning extras
+transformers==4.38.0
+datasets==2.17.0
+accelerate==0.27.0
+peft==0.8.0
+lightning==2.2.0
+hydra-core==1.3.2
+omegaconf==2.3.0
+
+# Bioinformatics
+biopython==1.83
+pysam==0.22.1
+pybedtools==0.9.1
+pyfaidx==0.8.0
+mappy==2.26
+fair-esm==2.0.0
+mhcflurry==2.0.6
+
+# Tracking
+mlflow==2.10.0
+wandb==0.16.2
+tensorboard==2.15.1
+
+# Visualization
+matplotlib==3.8.2
+seaborn==0.13.2
+plotly==5.18.0
+umap-learn==0.5.5
+bokeh==3.3.3
+
+# Utilities
+rich==13.7.0
+tqdm==4.66.1
+PyYAML==6.0.1
+click==8.1.7
+loguru==0.7.2
+requests==2.31.0
+aiohttp==3.9.3
+
+# Testing
+pytest==8.0.0
+pytest-cov==4.1.0

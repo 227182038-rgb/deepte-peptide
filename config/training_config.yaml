@@ -1,0 +1,114 @@
+# Training configuration
+
+training:
+  # Optimizer
+  optimizer:
+    type: adamw
+    lr: 1.0e-4
+    weight_decay: 1.0e-5
+    betas: [0.9, 0.999]
+    eps: 1.0e-8
+    amsgrad: false
+
+  # Scheduler
+  scheduler:
+    type: cosine_annealing_warmup
+    warmup_steps: 1000
+    max_steps: 100000
+    min_lr: 1.0e-6
+    warmup_init_lr: 1.0e-6
+
+  # Loss
+  loss:
+    type: multi_task
+    task_weights:
+      mhc_binding: 1.0
+      tcell_recognition: 1.5
+      immunogenicity_score: 1.2
+    pos_weight_tcell: 5.0  # class imbalance
+    label_smoothing: 0.05
+
+  # Training loop
+  max_epochs: 100
+  early_stopping:
+    enabled: true
+    monitor: val_loss
+    patience: 15
+    mode: min
+    min_delta: 1.0e-4
+
+  # Batch
+  batch_size: 256
+  eval_batch_size: 512
+  accumulate_grad_batches: 1
+  gradient_clip_val: 1.0
+  gradient_clip_algorithm: norm
+
+  # Validation
+  val_check_interval: 1.0
+  limit_val_batches: 1.0
+
+  # Mixed precision
+  precision: 16-mixed
+  bfloat16: false
+
+  # Data loading
+  num_workers: 8
+  pin_memory: true
+  drop_last: true
+  persistent_workers: true
+
+  # Distributed
+  strategy: auto   # auto | ddp | deepspeed
+  devices: auto
+  num_nodes: 1
+
+  # Augmentation
+  augment:
+    sequence_masking: 0.10
+    sequence_swapping: 0.05
+    expression_jitter: 0.05
+    modality_dropout: 0.30
+    mixup_alpha: 0.20
+
+  # Logging
+  log_every_n_steps: 50
+  flush_logs_every_n_steps: 100
+
+  # Checkpointing
+  checkpoint:
+    save_top_k: 3
+    save_last: true
+    monitor: val_loss
+    mode: min
+    dirpath: ${paths.model_dir}
+    filename: deepte-{epoch:03d}-{val_loss:.4f}
+    auto_insert_metric_name: false
+
+  # Resume
+  resume_from_checkpoint: null
+
+# Cross-validation
+cross_validation:
+  n_folds: 5
+  strategy: cancer_type_stratified
+  seed: 42
+
+# Benchmark baselines
+benchmark:
+  enabled: true
+  baselines:
+    - netmhcpan_4_1
+    - mhcflurry_2_0
+    - bigmhc_imm
+    - ptuneos
+    - deepimmuno
+    - tepes (文献启发方法)
+  metrics:
+    - auc_roc
+    - auc_pr
+    - f1
+    - mcc
+    - spearman
+    - kendall
+    - precision_at_k   # top-100, top-1k

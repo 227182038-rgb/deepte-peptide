@@ -1,0 +1,125 @@
+# Model architecture configuration
+
+model:
+  name: DeepTEPeptideNet
+  modalities:
+    - sequence
+    - expression
+    - translation
+    - te_features
+
+  # ---- Sequence encoder (peptide + MHC allele) ----------------------
+  sequence_encoder:
+    type: transformer
+    vocab_size: 26    # 20 AA + special tokens
+    d_model: 128
+    n_heads: 8
+    n_layers: 4
+    dropout: 0.1
+    max_peptide_len: 25
+    max_mhc_allele_len: 30
+    positional_encoding: sinusoidal
+    padding_idx: 0
+    mhc_allele_embedding_dim: 64
+
+  # ---- Expression encoder (TE transcript abundance) -----------------
+  expression_encoder:
+    type: cnn_lstm
+    input_dim: 1               # log2(TPM+1)
+    cnn_channels: [32, 64, 128]
+    cnn_kernel: 3
+    cnn_dropout: 0.2
+    lstm_hidden: 128
+    lstm_layers: 2
+    lstm_bidirectional: true
+    lstm_dropout: 0.2
+    n_cancer_types: 33
+    cancer_embedding_dim: 32
+
+  # ---- Translation encoder (Ribo-seq evidence) ----------------------
+  translation_encoder:
+    type: set_transformer
+    input_dim: 8                # per-position Ribo-seq features
+    d_model: 64
+    n_heads: 4
+    n_layers: 2
+    n_inducing_points: 16
+    dropout: 0.1
+
+  # ---- TE biophysical / evolutionary features -----------------------
+  te_feature_encoder:
+    type: mlp
+    input_dim: 64
+    hidden_dims: [128, 64]
+    dropout: 0.3
+    activation: gelu
+    batch_norm: true
+    features:
+      - superfamily_onehot        # 5
+      - family_onehot              # ~50
+      - te_age_estimate            # 1
+      - gc_content                 # 1
+      - length                     # 1
+      - conservation_score         # 1
+      - dna_methylation            # 1
+      - h3k9me3_signal             # 1
+      - h3k27me3_signal            # 1
+      - chromatin_accessibility    # 1
+
+  # ---- Cross-modal fusion -------------------------------------------
+  fusion:
+    type: gated_cross_attention
+    d_model: 128
+    n_heads: 8
+    n_layers: 2
+    dropout: 0.2
+    modality_dropout: 0.3         # drop entire modality during training
+    use_layernorm: true
+    residual: true
+
+  # ---- Multi-task heads ---------------------------------------------
+  heads:
+    mhc_binding:
+      type: regression
+      hidden_dims: [64, 32]
+      output_dim: 1
+      loss_weight: 1.0
+      activation: sigmoid
+    tcell_recognition:
+      type: binary
+      hidden_dims: [64, 32]
+      output_dim: 1
+      loss_weight: 1.5
+      activation: sigmoid
+    immunogenicity_score:
+      type: regression
+      hidden_dims: [64, 32]
+      output_dim: 1
+      loss_weight: 1.2
+      activation: sigmoid
+
+  # ---- Regularisation -----------------------------------------------
+  regularisation:
+    weight_decay: 1.0e-5
+    label_smoothing: 0.05
+    mixup_alpha: 0.2
+    stochastic_depth: 0.1
+
+  # ---- Initialisation -----------------------------------------------
+  init:
+    method: xavier_uniform
+    gain: 1.0
+
+# Pre-trained components
+pretrained:
+  esm_model: esm2_t12_35M_UR50D
+  esm_freeze: false
+  esm_lora: true
+  esm_lora_r: 8
+  esm_lora_alpha: 16
+
+# Ensemble
+ensemble:
+  n_models: 5
+  folds: 5
+  aggregation: mean  # mean | median | rank_average
